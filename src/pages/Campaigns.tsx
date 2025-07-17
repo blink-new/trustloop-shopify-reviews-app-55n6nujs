@@ -41,7 +41,7 @@ import {
   RefreshCw,
   Search
 } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { useShopify } from '../hooks/useShopify';
 import { toast } from 'sonner';
 
 // Types
@@ -84,147 +84,8 @@ interface EmailTemplate {
 }
 
 // Mock data
-const mockCampaigns: Campaign[] = [
-  {
-    id: '1',
-    name: 'Post-Purchase Review Request',
-    type: 'review_request',
-    status: 'active',
-    template: {
-      subject: 'How was your recent purchase?',
-      content: 'Hi {' + '{first_name}}, we hope you\'re loving your {' + '{product_title}}! Would you mind sharing your experience?',
-      previewText: 'Share your experience with {' + '{product_title}}'
-    },
-    trigger: {
-      event: 'order_delivered',
-      delay: 3,
-      conditions: ['order_value > 25']
-    },
-    stats: {
-      sent: 1247,
-      delivered: 1198,
-      opened: 456,
-      clicked: 123,
-      converted: 89
-    },
-    createdAt: '2024-07-01T10:00:00Z',
-    lastSent: '2024-07-15T14:30:00Z',
-    nextRun: '2024-07-16T10:00:00Z'
-  },
-  {
-    id: '2',
-    name: 'Review Follow-up Reminder',
-    type: 'follow_up',
-    status: 'active',
-    template: {
-      subject: 'Quick reminder: Share your thoughts',
-      content: 'Hi {' + '{first_name}}, just a friendly reminder to review your {' + '{product_title}}. Your feedback helps other customers!',
-      previewText: 'Don\'t forget to review {' + '{product_title}}'
-    },
-    trigger: {
-      event: 'no_review_after_first_email',
-      delay: 7,
-      conditions: ['first_email_opened']
-    },
-    stats: {
-      sent: 342,
-      delivered: 331,
-      opened: 145,
-      clicked: 67,
-      converted: 34
-    },
-    createdAt: '2024-07-01T10:00:00Z',
-    lastSent: '2024-07-14T16:20:00Z',
-    nextRun: '2024-07-17T10:00:00Z'
-  },
-  {
-    id: '3',
-    name: 'Thank You for Review',
-    type: 'thank_you',
-    status: 'active',
-    template: {
-      subject: 'Thank you for your review!',
-      content: 'Hi {' + '{first_name}}, thank you for taking the time to review {' + '{product_title}}. Here\'s a 10% discount for your next purchase!',
-      previewText: 'Thanks for your review + 10% off your next order'
-    },
-    trigger: {
-      event: 'review_submitted',
-      delay: 0,
-      conditions: ['rating >= 4']
-    },
-    stats: {
-      sent: 89,
-      delivered: 87,
-      opened: 72,
-      clicked: 45,
-      converted: 23
-    },
-    createdAt: '2024-07-01T10:00:00Z',
-    lastSent: '2024-07-15T11:45:00Z'
-  },
-  {
-    id: '4',
-    name: 'VIP Customer Outreach',
-    type: 'manual',
-    status: 'draft',
-    template: {
-      subject: 'Exclusive preview for our VIP customers',
-      content: 'Hi {' + '{first_name}}, as one of our valued customers, we\'d love to get your early feedback on our new products.',
-      previewText: 'Exclusive VIP preview and feedback request'
-    },
-    trigger: {
-      event: 'manual',
-      delay: 0,
-      conditions: ['customer_tier = vip']
-    },
-    stats: {
-      sent: 0,
-      delivered: 0,
-      opened: 0,
-      clicked: 0,
-      converted: 0
-    },
-    createdAt: '2024-07-10T15:00:00Z'
-  }
-];
-
-const mockTemplates: EmailTemplate[] = [
-  {
-    id: '1',
-    name: 'Modern Review Request',
-    category: 'review_collection',
-    subject: 'How was your {' + '{product_title}}?',
-    content: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Hi ${'{{first_name}}'}!</h2>
-      <p>We hope you're loving your recent purchase of ${'{{product_title}}'}.</p>
-      <p>Would you mind taking a moment to share your experience? Your feedback helps other customers make informed decisions.</p>
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="${'{{review_url}}'}" style="background: #6366F1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Write a Review</a>
-      </div>
-      <p>Thank you for choosing ${'{{shop_name}}'}!</p>
-    </div>`,
-    previewText: 'Share your experience with {' + '{product_title}}',
-    isDefault: true,
-    createdAt: '2024-07-01T10:00:00Z'
-  },
-  {
-    id: '2',
-    name: 'Friendly Follow-up',
-    category: 'follow_up',
-    subject: 'Just checking in about your {' + '{product_title}}',
-    content: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2>Hi ${'{{first_name}}'}!</h2>
-      <p>Just a friendly reminder about reviewing your ${'{{product_title}}'}.</p>
-      <p>We'd love to hear about your experience - it only takes a minute!</p>
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="${'{{review_url}}'}" style="background: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Leave a Review</a>
-      </div>
-    </div>`,
-    previewText: 'Quick reminder to review {' + '{product_title}}',
-    isDefault: true,
-    createdAt: '2024-07-01T10:00:00Z'
-  }
-];
+const mockCampaigns: Campaign[] = [];
+const mockTemplates: EmailTemplate[] = [];
 
 const CampaignCard = ({ 
   campaign, 
@@ -707,9 +568,9 @@ const CreateCampaignModal = ({
 };
 
 export default function Campaigns() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>(mockCampaigns);
-  const [templates, setTemplates] = useState<EmailTemplate[]>(mockTemplates);
-  const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>(mockCampaigns);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedType, setSelectedType] = useState('all');

@@ -42,7 +42,7 @@ import {
   Target,
   BarChart3
 } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { useShopify } from '../hooks/useShopify';
 import { toast } from 'sonner';
 
 // Types
@@ -97,100 +97,7 @@ interface ModerationSettings {
 }
 
 // Mock data
-const mockModerationItems: ModerationItem[] = [
-  {
-    id: '1',
-    type: 'review',
-    content: {
-      title: 'Amazing product!',
-      text: 'This is the best headphones I\'ve ever used. The sound quality is incredible and the battery lasts forever!',
-      rating: 5
-    },
-    author: {
-      name: 'Sarah Johnson',
-      email: 'sarah@example.com',
-      verified: true,
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150'
-    },
-    product: {
-      id: 'prod_1',
-      title: 'Wireless Bluetooth Headphones',
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'
-    },
-    aiAnalysis: {
-      spamScore: 15,
-      sentimentScore: 92,
-      toxicityScore: 5,
-      languageDetected: 'en',
-      suggestedAction: 'approve',
-      confidence: 95,
-      flags: []
-    },
-    status: 'pending',
-    createdAt: '2024-07-15T10:30:00Z'
-  },
-  {
-    id: '2',
-    type: 'review',
-    content: {
-      title: 'Terrible quality',
-      text: 'This product is absolute garbage. Don\'t waste your money on this piece of junk. The company is a scam!',
-      rating: 1
-    },
-    author: {
-      name: 'Anonymous User',
-      email: 'temp@tempmail.com',
-      verified: false
-    },
-    product: {
-      id: 'prod_1',
-      title: 'Wireless Bluetooth Headphones',
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'
-    },
-    aiAnalysis: {
-      spamScore: 78,
-      sentimentScore: 8,
-      toxicityScore: 85,
-      languageDetected: 'en',
-      suggestedAction: 'flag',
-      confidence: 87,
-      flags: ['potential_spam', 'high_toxicity', 'unverified_email']
-    },
-    status: 'pending',
-    createdAt: '2024-07-14T16:45:00Z'
-  },
-  {
-    id: '3',
-    type: 'question',
-    content: {
-      text: 'What is the warranty period for this product?'
-    },
-    author: {
-      name: 'Mike Chen',
-      email: 'mike@example.com',
-      verified: true
-    },
-    product: {
-      id: 'prod_2',
-      title: 'Smart Fitness Watch',
-      image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400'
-    },
-    aiAnalysis: {
-      spamScore: 5,
-      sentimentScore: 65,
-      toxicityScore: 2,
-      languageDetected: 'en',
-      suggestedAction: 'approve',
-      confidence: 98,
-      flags: []
-    },
-    status: 'approved',
-    createdAt: '2024-07-13T09:15:00Z',
-    moderatedAt: '2024-07-13T09:20:00Z',
-    moderatedBy: 'AI Auto-Moderator'
-  }
-];
-
+const mockModerationItems: ModerationItem[] = [];
 const mockSettings: ModerationSettings = {
   autoApproveThreshold: 85,
   autoRejectThreshold: 20,
@@ -198,8 +105,8 @@ const mockSettings: ModerationSettings = {
   enableSentimentAnalysis: true,
   enableToxicityFilter: true,
   enableLanguageDetection: true,
-  bannedWords: ['spam', 'scam', 'fake', 'garbage'],
-  trustedDomains: ['gmail.com', 'yahoo.com', 'outlook.com'],
+  bannedWords: [],
+  trustedDomains: [],
   notifications: {
     email: true,
     slack: false,
@@ -557,9 +464,23 @@ const ModerationSettings = ({
 };
 
 export default function Moderation() {
-  const [items, setItems] = useState<ModerationItem[]>(mockModerationItems);
-  const [settings, setSettings] = useState<ModerationSettings>(mockSettings);
-  const [filteredItems, setFilteredItems] = useState<ModerationItem[]>(mockModerationItems);
+  const [items, setItems] = useState<ModerationItem[]>([]);
+  const [settings, setSettings] = useState<ModerationSettings>({
+    autoApproveThreshold: 85,
+    autoRejectThreshold: 20,
+    enableSpamDetection: true,
+    enableSentimentAnalysis: true,
+    enableToxicityFilter: true,
+    enableLanguageDetection: true,
+    bannedWords: [],
+    trustedDomains: [],
+    notifications: {
+      email: true,
+      slack: false,
+      webhook: false
+    }
+  });
+  const [filteredItems, setFilteredItems] = useState<ModerationItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedType, setSelectedType] = useState('all');

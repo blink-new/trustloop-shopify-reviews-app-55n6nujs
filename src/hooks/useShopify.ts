@@ -1,10 +1,12 @@
 import { useContext } from 'react';
-import { ShopifyContext } from '../types/shopify';
+import { ShopifyContext, ShopifyContextType } from '../types/shopify';
 
-export const useShopify = () => {
+export function useShopify(): ShopifyContextType {
   const context = useContext(ShopifyContext);
+
   if (context === undefined) {
     throw new Error('useShopify must be used within a ShopifyProvider');
   }
+
   return context;
-};
+}

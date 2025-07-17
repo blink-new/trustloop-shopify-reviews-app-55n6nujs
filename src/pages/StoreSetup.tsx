@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { OnboardingWizard } from '../components/onboarding/OnboardingWizard';
 import { StoreConnection } from '../components/store/StoreConnection';
-import ShopifyAPIService from '../services/shopifyApi';
+import { useShopify } from '../hooks/useShopify';
 
 interface StoreData {
   name: string;
@@ -17,14 +17,16 @@ interface StoreData {
 }
 
 export default function StoreSetup() {
+  const { authenticatedFetch } = useShopify();
   const [isConnected, setIsConnected] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(!isConnected);
   const [storeData, setStoreData] = useState<StoreData | null>(null);
 
   const handleOnboardingComplete = async (data: { shopDomain: string; accessToken: string }) => {
+    if (!authenticatedFetch) return;
+
     try {
-      // Get real store data from Shopify API
-      const apiService = new ShopifyAPIService(data.shopDomain, data.accessToken);
+      const apiService = new ShopifyAPIService(authenticatedFetch);
       const shopInfo = await apiService.getShop();
       
       const storeData: StoreData = {

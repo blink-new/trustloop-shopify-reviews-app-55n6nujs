@@ -37,7 +37,7 @@ import {
   Archive,
   Clock
 } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { useShopify } from '../hooks/useShopify';
 import { toast } from 'sonner';
 
 // Types
@@ -75,85 +75,7 @@ interface Review {
 }
 
 // Mock data
-const mockReviews: Review[] = [
-  {
-    id: '1',
-    customer: {
-      name: 'Sarah Johnson',
-      email: 'sarah@example.com',
-      verified: true,
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150'
-    },
-    product: {
-      id: 'prod_1',
-      title: 'Wireless Bluetooth Headphones',
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'
-    },
-    rating: 5,
-    title: 'Absolutely love these headphones!',
-    content: 'The sound quality is amazing and they\'re so comfortable to wear for long periods. Battery life is excellent too. Highly recommend!',
-    createdAt: '2024-07-15T10:30:00Z',
-    status: 'published',
-    source: 'widget',
-    helpful: 12,
-    media: [
-      {
-        type: 'image',
-        url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'
-      }
-    ],
-    tags: ['verified-purchase', 'high-value'],
-    reply: {
-      content: 'Thank you so much for your wonderful review, Sarah! We\'re thrilled you love the headphones.',
-      author: 'Store Admin',
-      createdAt: '2024-07-15T14:20:00Z'
-    }
-  },
-  {
-    id: '2',
-    customer: {
-      name: 'Mike Chen',
-      email: 'mike@example.com',
-      verified: true
-    },
-    product: {
-      id: 'prod_2',
-      title: 'Smart Fitness Watch',
-      image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400'
-    },
-    rating: 4,
-    title: 'Great watch, minor issues',
-    content: 'Love the features and design. Battery could be better and the strap feels a bit cheap, but overall a solid product.',
-    createdAt: '2024-07-14T16:45:00Z',
-    status: 'published',
-    source: 'email',
-    helpful: 8,
-    media: [],
-    tags: ['verified-purchase']
-  },
-  {
-    id: '3',
-    customer: {
-      name: 'Anonymous User',
-      email: 'user@example.com',
-      verified: false
-    },
-    product: {
-      id: 'prod_1',
-      title: 'Wireless Bluetooth Headphones',
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'
-    },
-    rating: 1,
-    title: 'Terrible quality',
-    content: 'Broke after one week. Don\'t waste your money on this garbage.',
-    createdAt: '2024-07-13T09:15:00Z',
-    status: 'pending',
-    source: 'widget',
-    helpful: 2,
-    media: [],
-    tags: ['flagged']
-  }
-];
+const mockReviews: Review[] = [];
 
 const ProductFilterSelect = ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
   <Select value={value} onValueChange={onChange}>
@@ -486,8 +408,9 @@ const ReviewDetailModal = ({
 };
 
 export default function Reviews() {
-  const [reviews, setReviews] = useState<Review[]>(mockReviews);
-  const [filteredReviews, setFilteredReviews] = useState<Review[]>(mockReviews);
+  const { authenticatedFetch } = useShopify();
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
   const [selectedReviews, setSelectedReviews] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('all');

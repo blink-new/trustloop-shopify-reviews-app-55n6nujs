@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
-import { InteractiveChart, useChartData } from '../components/ui/interactive-chart';
+import { useShopify } from '../hooks/useShopify';
 import { 
   BarChart3, 
   ArrowUp, 
@@ -63,9 +63,9 @@ const StatCard = ({ title, value, description, icon, trend }: StatCardProps) => 
 );
 
 export default function Dashboard() {
+  const { shop, isLoading, isAuthenticated } = useShopify();
   const [isStoreConnected, setIsStoreConnected] = useState(false);
   const [storeName, setStoreName] = useState('');
-  const chartData = useChartData();
 
   useEffect(() => {
     // Check if store is connected
@@ -171,15 +171,15 @@ export default function Dashboard() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <div className="col-span-2">
-          <InteractiveChart
-            title="Performance Analytics"
-            description="Track your key metrics over time"
-            data={chartData.data}
-            metric={chartData.metric}
-            timeRange={chartData.timeRange}
-            onMetricChange={chartData.setMetric}
-            onTimeRangeChange={chartData.setTimeRange}
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle>Performance Analytics</CardTitle>
+              <CardDescription>Track your key metrics over time</CardDescription>
+            </CardHeader>
+            <CardContent className="h-80 flex items-center justify-center">
+              <p className="text-muted-foreground">Live chart coming soon</p>
+            </CardContent>
+          </Card>
         </div>
 
         <Card>

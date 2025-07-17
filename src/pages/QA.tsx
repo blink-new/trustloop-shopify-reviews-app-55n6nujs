@@ -35,7 +35,7 @@ import {
   TrendingUp,
   AlertCircle
 } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { useShopify } from '../hooks/useShopify';
 import { toast } from 'sonner';
 
 // Types
@@ -77,111 +77,7 @@ interface Answer {
 }
 
 // Mock data
-const mockQuestions: Question[] = [
-  {
-    id: '1',
-    customer: {
-      name: 'Alex Thompson',
-      email: 'alex@example.com',
-      verified: true,
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150'
-    },
-    product: {
-      id: 'prod_1',
-      title: 'Wireless Bluetooth Headphones',
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'
-    },
-    question: 'How long does the battery last on a single charge?',
-    createdAt: '2024-07-15T10:30:00Z',
-    status: 'published',
-    category: 'Battery Life',
-    helpful: 15,
-    notHelpful: 2,
-    isPinned: true,
-    answers: [
-      {
-        id: 'ans_1',
-        author: {
-          name: 'Store Admin',
-          type: 'admin'
-        },
-        content: 'The battery lasts up to 30 hours on a single charge with ANC off, and about 20 hours with ANC on.',
-        createdAt: '2024-07-15T11:00:00Z',
-        helpful: 12,
-        notHelpful: 0,
-        isAccepted: true
-      },
-      {
-        id: 'ans_2',
-        author: {
-          name: 'Sarah M.',
-          type: 'customer',
-          avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150'
-        },
-        content: 'I get about 25-28 hours in my daily use. Really impressed with the battery life!',
-        createdAt: '2024-07-15T14:20:00Z',
-        helpful: 8,
-        notHelpful: 1,
-        isAccepted: false
-      }
-    ]
-  },
-  {
-    id: '2',
-    customer: {
-      name: 'Maria Garcia',
-      email: 'maria@example.com',
-      verified: false
-    },
-    product: {
-      id: 'prod_2',
-      title: 'Smart Fitness Watch',
-      image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400'
-    },
-    question: 'Is this watch waterproof? Can I swim with it?',
-    createdAt: '2024-07-14T16:45:00Z',
-    status: 'published',
-    category: 'Water Resistance',
-    helpful: 8,
-    notHelpful: 0,
-    isPinned: false,
-    answers: [
-      {
-        id: 'ans_3',
-        author: {
-          name: 'Store Admin',
-          type: 'admin'
-        },
-        content: 'Yes, it has 5ATM water resistance rating, so it\'s safe for swimming and showering.',
-        createdAt: '2024-07-14T17:00:00Z',
-        helpful: 6,
-        notHelpful: 0,
-        isAccepted: true
-      }
-    ]
-  },
-  {
-    id: '3',
-    customer: {
-      name: 'John Davis',
-      email: 'john@example.com',
-      verified: true
-    },
-    product: {
-      id: 'prod_1',
-      title: 'Wireless Bluetooth Headphones',
-      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400'
-    },
-    question: 'What\'s the warranty period for these headphones?',
-    createdAt: '2024-07-13T09:15:00Z',
-    status: 'pending',
-    category: 'Warranty',
-    helpful: 3,
-    notHelpful: 0,
-    isPinned: false,
-    answers: []
-  }
-];
+const mockQuestions: Question[] = [];
 
 const categories = [
   'All Categories',
@@ -545,8 +441,8 @@ const QuestionDetailModal = ({
 };
 
 export default function QA() {
-  const [questions, setQuestions] = useState<Question[]>(mockQuestions);
-  const [filteredQuestions, setFilteredQuestions] = useState<Question[]>(mockQuestions);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('all');
